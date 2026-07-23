@@ -1,0 +1,874 @@
+<!DOCTYPE html>
+<html lang=zh-CN>
+<head>
+<meta charset=UTF-8>
+<meta name=viewport content=width=device-width, initial-scale=1.0>
+<title>鐢熸棩蹇箰</title>
+<style>
+/* ===== 鍏ㄥ眬 ===== */
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
+body {
+    font-family: Microsoft YaHei, PingFang SC, Noto Serif SC, serif;
+    background: #0a0a0a;
+    color: #fff;
+    overflow-x: hidden;
+}
+
+/* ===== 鐑熻姳棣栭〉 ===== */
+.fireworks-section {
+    position: relative;
+    width: 100%; height: 100vh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    background: radial-gradient(ellipse at center, #1a0a2e 0%, #0d0015 60%, #000 100%);
+}
+
+.fireworks-canvas {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 1;
+}
+
+/* 鏄熸槦 */
+.fireworks-stars {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 0;
+}
+.fireworks-stars .star {
+    position: absolute;
+    background: #fff;
+    border-radius: 50%;
+    animation: twinkle var(--dur) ease-in-out infinite;
+    animation-delay: var(--delay);
+}
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(1); }
+    50% { opacity: 1; transform: scale(1.5); }
+}
+
+/* 鐑熻姳妗?*/
+.rocket-container {
+    position: absolute;
+    bottom: 160px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    transition: opacity 0.6s ease, transform 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+.rocket-container.launched {
+    opacity: 0;
+    transform: translateX(-50%) translateY(-80px);
+    pointer-events: none;
+}
+.rocket-body {
+    width: 60px; height: 130px;
+    background: linear-gradient(180deg, #e63946 0%, #c1121f 40%, #780000 100%);
+    border-radius: 30px 30px 6px 6px;
+    position: relative;
+    box-shadow: 0 0 30px rgba(230,57,70,0.6), 0 0 60px rgba(230,57,70,0.3);
+}
+.rocket-body::before {
+    content: '';
+    position: absolute; top: -24px; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 30px solid transparent;
+    border-right: 30px solid transparent;
+    border-bottom: 30px solid #fca311;
+    filter: drop-shadow(0 0 10px rgba(252,163,17,0.8));
+}
+.rocket-body::after {
+    content: '';
+    position: absolute; bottom: -12px; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 20px;
+    background: #fca311;
+    border-radius: 50%;
+    box-shadow: 0 0 20px rgba(252,163,17,0.9), 0 0 40px rgba(252,163,17,0.5);
+}
+.rocket-stripe {
+    position: absolute; left: 0; right: 0; height: 10px;
+    background: linear-gradient(90deg, #fca311, #ffd60a, #fca311);
+    border-radius: 2px;
+}
+.rocket-stripe:nth-child(1) { top: 30px; }
+.rocket-stripe:nth-child(2) { top: 55px; }
+.rocket-stripe:nth-child(3) { top: 80px; }
+.rocket-fins {
+    display: flex; gap: 36px; margin-top: -4px;
+}
+.rocket-fin {
+    width: 0; height: 0;
+    border-left: 12px solid transparent;
+    border-right: 12px solid transparent;
+    border-top: 28px solid #780000;
+}
+
+/* 鎸夐挳 */
+.btn-ignite {
+    position: absolute;
+    bottom: 60px; left: 50%;
+    transform: translateX(-50%);
+    z-index: 20;
+    padding: 16px 50px;
+    font-size: 24px; font-weight: bold;
+    color: #fff;
+    background: linear-gradient(135deg, #fca311, #e63946);
+    border: none;
+    border-radius: 50px;
+    cursor: pointer;
+    letter-spacing: 4px;
+    box-shadow: 0 8px 32px rgba(252,163,17,0.5), 0 0 60px rgba(230,57,70,0.3);
+    transition: all 0.3s ease;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+.btn-ignite:hover {
+    transform: translateX(-50%) scale(1.08);
+    box-shadow: 0 12px 40px rgba(252,163,17,0.7), 0 0 80px rgba(230,57,70,0.5);
+}
+.btn-ignite:active {
+    transform: translateX(-50%) scale(0.95);
+}
+.btn-ignite.hidden {
+    opacity: 0; pointer-events: none;
+    transform: translateX(-50%) scale(0.8);
+}
+
+/* 铔嬬硶瀹瑰櫒 */
+.cake-container {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    opacity: 0;
+    transition: opacity 1.2s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.cake-container.show { opacity: 1; }
+
+.birthday-title {
+    font-size: 56px; font-weight: bold;
+    color: #ffd60a;
+    text-shadow:
+        0 0 20px rgba(255,214,10,0.8),
+        0 0 40px rgba(255,214,10,0.6),
+        0 0 80px rgba(255,214,10,0.4),
+        0 0 120px rgba(252,163,17,0.3),
+        0 4px 8px rgba(0,0,0,0.5);
+    margin-bottom: 30px;
+    animation: titleGlow 2s ease-in-out infinite alternate;
+    letter-spacing: 6px;
+}
+@keyframes titleGlow {
+    0% { text-shadow: 0 0 20px rgba(255,214,10,0.8), 0 0 40px rgba(255,214,10,0.6), 0 0 80px rgba(255,214,10,0.4); }
+    100% { text-shadow: 0 0 30px rgba(255,214,10,1), 0 0 60px rgba(255,214,10,0.8), 0 0 100px rgba(255,214,10,0.6), 0 0 140px rgba(252,163,17,0.4); }
+}
+
+/* 铔嬬硶 */
+.cake { position: relative; }
+.cake-layer-base {
+    width: 220px; height: 60px;
+    background: linear-gradient(180deg, #f9a8d4 0%, #ec4899 50%, #db2777 100%);
+    border-radius: 12px;
+    position: relative;
+    box-shadow: 0 8px 30px rgba(236,72,153,0.5), inset 0 2px 0 rgba(255,255,255,0.3);
+}
+.cake-layer-base::after {
+    content: ''; position: absolute; top: 10px; left: 0; right: 0;
+    height: 8px; background: rgba(255,255,255,0.4); border-radius: 4px;
+    margin: 0 12px;
+}
+.cake-layer-mid {
+    width: 180px; height: 50px;
+    background: linear-gradient(180deg, #fde68a 0%, #fbbf24 50%, #f59e0b 100%);
+    border-radius: 10px;
+    margin: -8px auto 0;
+    position: relative; z-index: 1;
+    box-shadow: 0 6px 24px rgba(251,191,36,0.5), inset 0 2px 0 rgba(255,255,255,0.3);
+}
+.cake-layer-mid::after {
+    content: ''; position: absolute; top: 8px; left: 0; right: 0;
+    height: 6px; background: rgba(255,255,255,0.4); border-radius: 3px;
+    margin: 0 10px;
+}
+.cake-layer-top {
+    width: 140px; height: 40px;
+    background: linear-gradient(180deg, #a7f3d0 0%, #34d399 50%, #10b981 100%);
+    border-radius: 8px;
+    margin: -6px auto 0;
+    position: relative; z-index: 2;
+    box-shadow: 0 4px 20px rgba(52,211,153,0.5), inset 0 2px 0 rgba(255,255,255,0.3);
+}
+.cake-layer-top::after {
+    content: ''; position: absolute; top: 6px; left: 0; right: 0;
+    height: 5px; background: rgba(255,255,255,0.4); border-radius: 3px;
+    margin: 0 8px;
+}
+.cream-edge {
+    position: absolute; top: -8px; left: -4px; right: -4px;
+    height: 10px; display: flex; justify-content: space-around;
+}
+.cream-edge span {
+    width: 14px; height: 14px; background: #fff;
+    border-radius: 50%; box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.candles {
+    position: absolute; top: -50px; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 16px; z-index: 5;
+}
+.candle {
+    width: 8px; height: 40px;
+    background: linear-gradient(180deg, #fca311 0%, #f59e0b 100%);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+    box-shadow: 0 2px 8px rgba(252,163,17,0.4);
+}
+.candle:nth-child(2) {
+    background: linear-gradient(180deg, #ec4899 0%, #db2777 100%);
+    box-shadow: 0 2px 8px rgba(236,72,153,0.4);
+}
+.candle:nth-child(3) {
+    background: linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%);
+    box-shadow: 0 2px 8px rgba(139,92,246,0.4);
+}
+.flame {
+    position: absolute; top: -16px; left: 50%; transform: translateX(-50%);
+    width: 12px; height: 16px;
+    background: radial-gradient(ellipse at center, #fff 10%, #fca311 50%, #e63946 85%, transparent 100%);
+    border-radius: 50% 50% 50% 50% / 60% 60% 40% 40%;
+    animation: flicker 0.3s ease-in-out infinite alternate;
+}
+@keyframes flicker {
+    0% { transform: translateX(-50%) scaleY(1) scaleX(1); opacity: 0.9; }
+    100% { transform: translateX(-50%) scaleY(0.85) scaleX(1.1); opacity: 1; }
+}
+
+/* 寮瑰箷 */
+.barrage-container {
+    position: absolute; top: 0; left: 0;
+    width: 100%; height: 100%;
+    pointer-events: none;
+    z-index: 5;
+    opacity: 0;
+    transition: opacity 0.8s ease 0.5s;
+}
+.barrage-container.active { opacity: 1; }
+.barrage-item {
+    position: absolute;
+    white-space: nowrap;
+    font-size: 28px; font-weight: bold;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.5);
+    animation: barrageMove linear infinite;
+}
+@keyframes barrageMove {
+    0% { transform: translateX(100vw); }
+    100% { transform: translateX(-100%); }
+}
+
+/* 鍚戜笅婊氬姩鎻愮ず */
+.scroll-hint {
+    position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
+    z-index: 15; text-align: center;
+    opacity: 0;
+    transition: opacity 1s ease;
+    pointer-events: none;
+}
+.scroll-hint.show { opacity: 1; }
+.scroll-hint .hint-text {
+    font-size: 16px; letter-spacing: 4px;
+    color: rgba(255,255,255,0.8);
+    animation: fadeInOut 2.5s ease-in-out infinite;
+}
+.scroll-hint .hint-arrow {
+    display: block; margin: 10px auto 0;
+    width: 24px; height: 40px;
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    position: relative;
+}
+.scroll-hint .hint-arrow::after {
+    content: '';
+    position: absolute; top: 8px; left: 50%;
+    width: 4px; height: 10px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    animation: arrowDown 1.8s ease-in-out infinite;
+}
+@keyframes arrowDown {
+    0%, 100% { top: 8px; opacity: 0.3; }
+    50% { top: 18px; opacity: 1; }
+}
+@keyframes fadeInOut {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* ===== 瑙嗛鑳屾櫙棣栭〉 ===== */
+.video-section {
+    position: relative;
+    width: 100%; height: 100vh;
+    scroll-snap-align: start;
+    overflow: hidden;
+}
+.video-section iframe {
+    position: absolute;
+    top: 50%; left: 50%;
+    width: 100vw; height: 56.25vw;
+    min-width: 100vw; min-height: 100vh;
+    transform: translate(-50%, -50%);
+    border: none;
+    pointer-events: none;
+}
+.video-overlay {
+    position: absolute; inset: 0;
+    background: linear-gradient(to bottom, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.4) 70%, rgba(0,0,0,0.8) 100%);
+    z-index: 1; pointer-events: none;
+}
+.video-hint {
+    position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+    z-index: 2; text-align: center;
+}
+.video-hint .scroll-text {
+    font-size: 16px; letter-spacing: 4px;
+    color: rgba(255,255,255,0.8);
+    animation: fadeInOut 2.5s ease-in-out infinite;
+}
+.video-hint .scroll-arrow {
+    display: block; margin: 12px auto 0;
+    width: 24px; height: 40px;
+    border: 2px solid rgba(255,255,255,0.6);
+    border-radius: 12px;
+    position: relative;
+}
+.scroll-arrow::after {
+    content: '';
+    position: absolute; top: 8px; left: 50%;
+    width: 4px; height: 10px;
+    background: rgba(255,255,255,0.8);
+    border-radius: 2px;
+    transform: translateX(-50%);
+    animation: scrollDown 1.8s ease-in-out infinite;
+}
+@keyframes scrollDown {
+    0%, 100% { top: 8px; opacity: 0.3; }
+    50% { top: 18px; opacity: 1; }
+}
+
+/* ===== 骞荤伅鐗囧尯鍩?===== */
+.slide-section {
+    position: relative;
+    width: 100%; height: 100vh;
+    scroll-snap-align: start;
+    overflow: hidden;
+    display: flex; align-items: center; justify-content: center;
+    background: #0a0a0a;
+}
+.slide-bg {
+    position: absolute; inset: 0;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    filter: brightness(0.55);
+    transition: filter 0.8s ease;
+}
+.slide-section.visible .slide-bg { filter: brightness(0.7); }
+
+.birthday-text {
+    position: absolute; z-index: 2;
+    text-align: center;
+    opacity: 0;
+    transform: translateY(-120px);
+    transition: none;
+}
+.slide-section.visible .birthday-text {
+    animation: textDrop 1.8s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+}
+@keyframes textDrop {
+    0%   { opacity: 0; transform: translateY(-150px) scale(0.6); }
+    50%  { opacity: 1; transform: translateY(0) scale(1.05); }
+    65%  { opacity: 1; transform: translateY(-8px) scale(0.97); }
+    80%  { opacity: 1; transform: translateY(0) scale(1.01); }
+    100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.birthday-text h2 {
+    font-size: clamp(42px, 7vw, 80px);
+    font-weight: 700;
+    letter-spacing: 12px;
+    background: linear-gradient(135deg, #ff6b9d, #ffb347, #ff6b9d);
+    background-size: 200% 200%;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: gradientShift 3s ease-in-out infinite;
+    text-shadow: none;
+    filter: drop-shadow(0 0 30px rgba(255,107,157,0.5));
+}
+@keyframes gradientShift {
+    0%, 100% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+}
+.birthday-text .sub {
+    font-size: clamp(14px, 2vw, 20px);
+    letter-spacing: 6px;
+    color: rgba(255,255,255,0.7);
+    margin-top: 16px;
+    opacity: 0;
+    animation: fadeUp 0.8s 0.6s ease forwards;
+}
+@keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.slide-tag {
+    position: absolute; bottom: 40px; right: 40px; z-index: 2;
+    font-size: 13px; letter-spacing: 3px;
+    color: rgba(255,255,255,0.4);
+    opacity: 0;
+    transition: opacity 1s ease;
+}
+.slide-section.visible .slide-tag { opacity: 1; }
+
+/* 杩涘害鏉?*/
+.progress-bar {
+    position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
+    z-index: 100; display: flex; flex-direction: column; gap: 14px;
+}
+.progress-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.25);
+    transition: all 0.4s ease;
+    cursor: pointer;
+}
+.progress-dot.active {
+    background: #ff6b9d;
+    box-shadow: 0 0 12px rgba(255,107,157,0.8);
+    transform: scale(1.4);
+}
+
+/* ===== 缁撳熬鍗＄墖 ===== */
+.end-section {
+    position: relative;
+    width: 100%; height: 100vh;
+    scroll-snap-align: start;
+    display: flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, #1a0a10 0%, #2d1420 40%, #1a0a10 100%);
+    text-align: center;
+}
+.end-content h3 {
+    font-size: clamp(28px, 5vw, 48px);
+    font-weight: 300;
+    letter-spacing: 8px;
+    background: linear-gradient(135deg, #ff6b9d, #ffb347);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+.end-content .heart {
+    display: inline-block;
+    animation: heartbeat 1.2s ease-in-out infinite;
+    font-size: 48px;
+    margin-top: 20px;
+}
+@keyframes heartbeat {
+    0%, 100% { transform: scale(1); }
+    15% { transform: scale(1.25); }
+    30% { transform: scale(1); }
+    45% { transform: scale(1.15); }
+    60% { transform: scale(1); }
+}
+
+@media (max-width: 768px) {
+    .progress-bar { right: 8px; gap: 10px; }
+    .progress-dot { width: 6px; height: 6px; }
+    .slide-tag { right: 16px; bottom: 24px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ===== 鐑熻姳棣栭〉 ===== -->
+<section class=fireworks-section id=fireworksSection>
+    <div class=fireworks-stars id=fireworksStars></div>
+    <canvas class=fireworks-canvas id=fireworksCanvas></canvas>
+
+    <div class=cake-container id=cakeContainer>
+        <div class=birthday-title>鐢熸棩蹇箰</div>
+        <div class=cake>
+            <div class=candles>
+                <div class=candle><div class=flame></div></div>
+                <div class=candle><div class=flame></div></div>
+                <div class=candle><div class=flame></div></div>
+            </div>
+            <div class=cake-layer-top>
+                <div class=cream-edge><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class=cake-layer-mid>
+                <div class=cream-edge><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+            <div class=cake-layer-base>
+                <div class=cream-edge><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            </div>
+        </div>
+    </div>
+
+    <div class=barrage-container id=barrageContainer></div>
+
+    <div class=rocket-container id=rocketContainer>
+        <div class=rocket-body>
+            <div class=rocket-stripe></div>
+            <div class=rocket-stripe></div>
+            <div class=rocket-stripe></div>
+        </div>
+        <div class=rocket-fins>
+            <div class=rocket-fin></div>
+            <div class=rocket-fin></div>
+        </div>
+    </div>
+
+    <button class=btn-ignite id=btnIgnite onclick=ignite()>鐐?鐕?鐑?鑺?/button>
+
+    <div class=scroll-hint id=scrollHint>
+        <span class=hint-text>鍚戜笅婊氬姩</span>
+        <span class=hint-arrow></span>
+    </div>
+</section>
+
+<!-- ===== 瑙嗛鑳屾櫙棣栭〉 ===== -->
+<section class=video-section id=videoSection>
+    <iframe
+        src=https://player.bilibili.com/player.html?bvid=BV1ab411n7no&autoplay=1&muted=1&controls=0&loop=1&danmaku=0&t=0
+        allow=autoplay
+        sandbox=allow-scripts allow-same-origin allow-presentation>
+    </iframe>
+    <div class=video-overlay></div>
+    <div class=video-hint>
+        <span class=scroll-text>鍚戜笅婊氬姩</span>
+        <span class=scroll-arrow></span>
+    </div>
+</section>
+
+<!-- 骞荤伅鐗囧尯鍩?- JS 鍔ㄦ€佺敓鎴?-->
+<div id=slidesContainer></div>
+
+<!-- 缁撳熬 -->
+<section class=end-section id=endSection>
+    <div class=end-content>
+        <h3>鎰夸綘姘歌繙琚埍鍖呭洿</h3>
+        <div class=heart>&hearts;</div>
+    </div>
+</section>
+
+<!-- 鍙充晶杩涘害鏉?-->
+<div class=progress-bar id=progressBar></div>
+
+<script>
+// ===== 鐑熻姳鍔ㄧ敾寮曟搸 =====
+(function() {
+    const canvas = document.getElementById('fireworksCanvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+    let animationId = null;
+
+    function resizeCanvas() {
+        const section = document.getElementById('fireworksSection');
+        canvas.width = section.clientWidth;
+        canvas.height = section.clientHeight;
+    }
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    class Particle {
+        constructor(x, y, color) {
+            this.x = x; this.y = y;
+            const angle = Math.random() * Math.PI * 2;
+            const speed = Math.random() * 6 + 3;
+            this.vx = Math.cos(angle) * speed;
+            this.vy = Math.sin(angle) * speed;
+            this.color = color;
+            this.alpha = 1;
+            this.decay = Math.random() * 0.015 + 0.008;
+            this.size = Math.random() * 3 + 1.5;
+            this.gravity = 0.06;
+            this.trail = [];
+        }
+        update() {
+            this.trail.push({ x: this.x, y: this.y, alpha: this.alpha });
+            if (this.trail.length > 5) this.trail.shift();
+            this.x += this.vx;
+            this.y += this.vy;
+            this.vy += this.gravity;
+            this.vx *= 0.99;
+            this.alpha -= this.decay;
+            this.size *= 0.998;
+        }
+        draw(ctx) {
+            for (let i = 0; i < this.trail.length; i++) {
+                const t = this.trail[i];
+                const a = t.alpha * (i / this.trail.length) * 0.5;
+                ctx.beginPath();
+                ctx.arc(t.x, t.y, this.size * 0.7, 0, Math.PI * 2);
+                ctx.fillStyle = this.color.replace('1)', a + ')');
+                ctx.fill();
+            }
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+            ctx.fillStyle = this.color.replace('1)', this.alpha + ')');
+            ctx.fill();
+            ctx.beginPath();
+            ctx.arc(this.x, this.y, this.size * 2, 0, Math.PI * 2);
+            ctx.fillStyle = this.color.replace('1)', (this.alpha * 0.3) + ')');
+            ctx.fill();
+        }
+    }
+
+    const colors = [
+        'rgba(255, 59, 48, 1)', 'rgba(255, 149, 0, 1)', 'rgba(255, 214, 10, 1)',
+        'rgba(52, 199, 89, 1)', 'rgba(0, 122, 255, 1)', 'rgba(175, 82, 222, 1)',
+        'rgba(255, 45, 85, 1)', 'rgba(90, 200, 250, 1)', 'rgba(255, 204, 0, 1)',
+        'rgba(255, 87, 34, 1)'
+    ];
+
+    function explode(x, y) {
+        for (let i = 0; i < 200; i++) {
+            particles.push(new Particle(x, y, colors[Math.floor(Math.random() * colors.length)]));
+        }
+        setTimeout(() => {
+            const cx = x + (Math.random() - 0.5) * 100;
+            const cy = y + (Math.random() - 0.5) * 60;
+            for (let i = 0; i < 80; i++) {
+                particles.push(new Particle(cx, cy, colors[Math.floor(Math.random() * colors.length)]));
+            }
+        }, 150);
+    }
+
+    function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        particles = particles.filter(p => p.alpha > 0);
+        particles.forEach(p => { p.update(); p.draw(ctx); });
+        if (particles.length > 0) {
+            animationId = requestAnimationFrame(animate);
+        } else {
+            animationId = null;
+        }
+    }
+
+    // 鏄熸槦鑳屾櫙
+    const starsContainer = document.getElementById('fireworksStars');
+    for (let i = 0; i < 80; i++) {
+        const star = document.createElement('div');
+        star.className = 'star';
+        const size = Math.random() * 3 + 1;
+        star.style.width = size + 'px';
+        star.style.height = size + 'px';
+        star.style.left = Math.random() * 100 + '%';
+        star.style.top = Math.random() * 100 + '%';
+        star.style.setProperty('--dur', (Math.random() * 3 + 2) + 's');
+        star.style.setProperty('--delay', (Math.random() * 4) + 's');
+        starsContainer.appendChild(star);
+    }
+
+    // 寮瑰箷
+    const barrageMessages = [
+        { text: '鐢熸棩蹇箰', color: '#ffd60a' },
+        { text: 'Happy Birthday', color: '#ff6b9d' },
+        { text: '銇婅獣鐢熸棩銇娿倎銇с仺銇?, color: '#56ccf2' },
+        { text: '靸濎澕 於曧晿頃╇媹雼?, color: '#a78bfa' },
+        { text: 'Joyeux Anniversaire', color: '#fbbf24' },
+        { text: 'Alles Gute zum Geburtstag', color: '#34d399' },
+        { text: 'Feliz Cumplea帽os', color: '#fb923c' },
+        { text: 'Buon Compleanno', color: '#f472b6' },
+        { text: '小 写薪褢屑 褉芯卸写械薪懈褟', color: '#60a5fa' },
+        { text: 'Feliz Anivers谩rio', color: '#c084fc' },
+    ];
+
+    function startBarrage() {
+        const container = document.getElementById('barrageContainer');
+        container.innerHTML = '';
+        container.classList.add('active');
+        const lanes = [10, 20, 30, 40, 50, 60, 70, 80];
+        const usedLanes = [];
+        barrageMessages.forEach((msg, index) => {
+            setTimeout(() => {
+                const el = document.createElement('div');
+                el.className = 'barrage-item';
+                el.textContent = msg.text;
+                el.style.color = msg.color;
+                let lane;
+                if (usedLanes.length < lanes.length) {
+                    const available = lanes.filter(l => !usedLanes.includes(l));
+                    lane = available[Math.floor(Math.random() * available.length)];
+                } else {
+                    lane = lanes[Math.floor(Math.random() * lanes.length)];
+                }
+                usedLanes.push(lane);
+                if (usedLanes.length > lanes.length) usedLanes.shift();
+                el.style.top = lane + '%';
+                el.style.animationDuration = (Math.random() * 6 + 8) + 's';
+                container.appendChild(el);
+                el.addEventListener('animationiteration', () => {
+                    const newLane = lanes[Math.floor(Math.random() * lanes.length)];
+                    el.style.top = newLane + '%';
+                    el.style.animationDuration = (Math.random() * 6 + 8) + 's';
+                });
+            }, index * 400);
+        });
+    }
+
+    // 鐐圭噧鐑熻姳
+    window.ignite = function() {
+        const btn = document.getElementById('btnIgnite');
+        const rocket = document.getElementById('rocketContainer');
+        btn.classList.add('hidden');
+        rocket.classList.add('launched');
+
+        const section = document.getElementById('fireworksSection');
+        const centerX = section.clientWidth / 2;
+        const targetY = section.clientHeight * 0.3;
+
+        const riseInterval = setInterval(() => {
+            for (let i = 0; i < 3; i++) {
+                const p = new Particle(
+                    centerX + (Math.random() - 0.5) * 10,
+                    section.clientHeight - 160 - Math.random() * 40,
+                    'rgba(252, 163, 17, 1)'
+                );
+                p.vx = (Math.random() - 0.5) * 0.5;
+                p.vy = -Math.random() * 2 - 1;
+                p.decay = 0.03;
+                particles.push(p);
+            }
+            if (!animationId) animationId = requestAnimationFrame(animate);
+        }, 30);
+
+        setTimeout(() => {
+            clearInterval(riseInterval);
+            explode(centerX, targetY);
+            if (!animationId) animationId = requestAnimationFrame(animate);
+
+            setTimeout(() => {
+                document.getElementById('cakeContainer').classList.add('show');
+                startBarrage();
+                // 铔嬬硶鍑虹幇鍚?4 绉掓樉绀哄悜涓嬫粴鍔ㄦ彁绀?                setTimeout(() => {
+                    document.getElementById('scrollHint').classList.add('show');
+                }, 4000);
+            }, 1000);
+        }, 1200);
+    };
+})();
+
+// ===== 鐢熸棩璐哄崱骞荤伅鐗?=====
+const photos = [
+    { src: './0A4A8009013150F66202A729F6EB4DD6.jpg', tag: '鍏冩皵婊℃弧' },
+    { src: './2FBD6E39F9C6A25B0C3788E52D79737A.jpg', tag: '鐢滅編鏃跺厜' },
+    { src: './43CC63968C40D182D28C59C40C00C7F7.jpg', tag: '浼橀泤濡傝瘲' },
+    { src: './456E5912D18E9747D2399A2DD89624B6.jpg', tag: '闆ㄤ腑婕' },
+    { src: './6082812289A54673CD90AE0827EE236E.jpg', tag: '鏆楀娴佸厜' },
+    { src: './958A3BBEF8774EDAAE2F3B4487370D0F.jpg', tag: '搴勫洯鍗堝悗' },
+    { src: './D0E2A61CBC2875FF1AB801C3E21543C8.jpg', tag: '鑽夊湴鏆栭槼' },
+    { src: './0C677531CF3B15E1787FFC313306D9DB.jpg', tag: '鎱垫噿鏃ュ父' },
+    { src: './12E760BA23BEBFB5030A39BC81E28FBD.jpg', tag: '鐢板洯椋庨搩' },
+    { src: './1E53E073BC84A8F7FD2564974D0D7244.jpg', tag: '闀滀腑鏃跺厜' },
+    { src: './17AEDF0194FCA81F1AF81C1C72B7CF81.jpg', tag: '娆㈣仛鏃跺埢' },
+    { src: './7DAC66202BF1349539FCC5F6046F135B.jpg', tag: '鍙埍鍐棩' },
+    { src: './985F9B3F5E599C483BE434C97A0A48AF.jpg', tag: '鐏跨儌绗戝' }
+];
+
+const blessings = [
+    '鎰夸綘宀佸瞾骞冲畨锛屽勾骞村鎰?,
+    '鐢熸棩蹇箰锛屾案杩滅編涓藉姩浜?,
+    '鎰夸綘鐪奸噷鏈夊厜锛屽績涓湁鐖?,
+    '鎰夸綘琚笘鐣屾俯鏌斾互寰?,
+    '鏂扮殑涓€宀侊紝鏂扮殑绮惧僵',
+    '鎰夸綘鎵€鎰匡紝缁堣兘瀹炵幇',
+    '鐢熸棩蹇箰锛屼竾浜嬭儨鎰?,
+    '鎰夸綘姘歌繙鑷敱濡傞',
+    '宀佹湀涓嶈触缇庝汉锛岀敓鏃ュ揩涔?,
+    '鎰夸綘姣忓ぉ閮藉儚浠婂ぉ涓€鏍峰紑蹇?,
+    '鎰熻阿鐩搁亣锛岀敓鏃ュ揩涔?,
+    '鎰夸綘鍓嶇▼浼奸敠锛屾湭鏉ュ彲鏈?,
+    '鐢熸棩蹇箰锛屾効浣犳案杩滈棯闂彂鍏?
+];
+
+const container = document.getElementById('slidesContainer');
+const progressBar = document.getElementById('progressBar');
+
+// 鐑熻姳棣栭〉鐨勮繘搴︾偣
+(function() {
+    const dot = document.createElement('span');
+    dot.className = 'progress-dot';
+    dot.title = '鐑熻姳璐哄崱';
+    dot.onclick = () => {
+        document.getElementById('fireworksSection').scrollIntoView({ behavior: 'smooth' });
+    };
+    progressBar.appendChild(dot);
+})();
+
+photos.forEach((photo, i) => {
+    const section = document.createElement('section');
+    section.className = 'slide-section';
+    section.id = 'slide' + i;
+    section.innerHTML = `
+        <div class=slide-bg style=background-image:url('${photo.src}')></div>
+        <div class=birthday-text>
+            <h2>${blessings[i]}</h2>
+            <div class=sub>Happy Birthday</div>
+        </div>
+        <div class=slide-tag>${String(i+1).padStart(2,'0')} 路 ${photo.tag}</div>
+    `;
+    container.appendChild(section);
+
+    const dot = document.createElement('span');
+    dot.className = 'progress-dot';
+    dot.title = photo.tag;
+    dot.onclick = () => {
+        section.scrollIntoView({ behavior: 'smooth' });
+    };
+    progressBar.appendChild(dot);
+});
+
+// Intersection Observer
+const allSections = document.querySelectorAll('.fireworks-section, .slide-section, .video-section, .end-section');
+const dots = document.querySelectorAll('.progress-dot');
+
+const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const id = entry.target.id;
+            if (entry.target.classList.contains('slide-section')) {
+                entry.target.classList.add('visible');
+            }
+            dots.forEach(d => d.classList.remove('active'));
+            if (id === 'fireworksSection') {
+                if (dots[0]) dots[0].classList.add('active');
+            } else if (id === 'videoSection') {
+                // 瑙嗛鍖哄搴旂浜屼釜鐐癸紙绱㈠紩1锛?                if (dots[1]) dots[1].classList.add('active');
+            } else if (id === 'endSection') {
+                if (dots.length > 0) dots[dots.length - 1].classList.add('active');
+            } else if (id && id.startsWith('slide')) {
+                const idx = parseInt(id.replace('slide', '')) + 2; // +2 璺宠繃鐑熻姳鍜岃棰?                if (dots[idx]) dots[idx].classList.add('active');
+            }
+        }
+    });
+}, { threshold: 0.6 });
+
+allSections.forEach(s => observer.observe(s));
+
+document.addEventListener('DOMContentLoaded', () => {
+    if (photos.length > 0) {
+        const img = new Image();
+        img.src = photos[0].src;
+    }
+});
+</script>
+</body>
+</html>
