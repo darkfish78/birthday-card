@@ -564,6 +564,9 @@ body {
     </div>
 </section>
 
+<!-- 背景音乐 -->
+<audio id="bgMusic" src="./bgm.mp3" loop preload="auto"></audio>
+
 <!-- 右侧进度条 -->
 <div class="progress-bar" id="progressBar"></div>
 
@@ -726,6 +729,13 @@ body {
         const rocket = document.getElementById('rocketContainer');
         btn.classList.add('hidden');
         rocket.classList.add('launched');
+
+        // 启动背景音乐
+        const bgm = document.getElementById('bgMusic');
+        if (bgm) {
+            bgm.volume = 0.5;
+            bgm.play().catch(() => {});
+        }
 
         const section = document.getElementById('fireworksSection');
         const centerX = section.clientWidth / 2;
