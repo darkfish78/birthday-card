@@ -1,21 +1,21 @@
-﻿<!DOCTYPE html>
-<html lang=zh-CN>
+<!DOCTYPE html>
+<html lang="zh-CN">
 <head>
 <meta charset="UTF-8">
-<meta name=viewport content=width=device-width, initial-scale=1.0>
-<title>鐢熸棩蹇箰</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>生日快乐</title>
 <style>
-/* ===== 鍏ㄥ眬 ===== */
+/* ===== 全局 ===== */
 * { margin: 0; padding: 0; box-sizing: border-box; }
 html { scroll-behavior: smooth; scroll-snap-type: y mandatory; }
 body {
-    font-family: Microsoft YaHei, PingFang SC, Noto Serif SC, serif;
+    font-family: "Microsoft YaHei", "PingFang SC", "Noto Serif SC", serif;
     background: #0a0a0a;
     color: #fff;
     overflow-x: hidden;
 }
 
-/* ===== 鐑熻姳棣栭〉 ===== */
+/* ===== 烟花首页 ===== */
 .fireworks-section {
     position: relative;
     width: 100%; height: 100vh;
@@ -31,7 +31,7 @@ body {
     z-index: 1;
 }
 
-/* 鏄熸槦 */
+/* 星星 */
 .fireworks-stars {
     position: absolute; top: 0; left: 0;
     width: 100%; height: 100%;
@@ -50,7 +50,7 @@ body {
     50% { opacity: 1; transform: scale(1.5); }
 }
 
-/* 鐑熻姳妗?*/
+/* 烟花桶 */
 .rocket-container {
     position: absolute;
     bottom: 160px;
@@ -109,7 +109,7 @@ body {
     border-top: 28px solid #780000;
 }
 
-/* 鎸夐挳 */
+/* 按钮 */
 .btn-ignite {
     position: absolute;
     bottom: 60px; left: 50%;
@@ -139,7 +139,7 @@ body {
     transform: translateX(-50%) scale(0.8);
 }
 
-/* 铔嬬硶瀹瑰櫒 */
+/* 蛋糕容器 */
 .cake-container {
     position: absolute;
     top: 50%; left: 50%;
@@ -171,7 +171,7 @@ body {
     100% { text-shadow: 0 0 30px rgba(255,214,10,1), 0 0 60px rgba(255,214,10,0.8), 0 0 100px rgba(255,214,10,0.6), 0 0 140px rgba(252,163,17,0.4); }
 }
 
-/* 铔嬬硶 */
+/* 蛋糕 */
 .cake { position: relative; }
 .cake-layer-base {
     width: 220px; height: 60px;
@@ -250,7 +250,7 @@ body {
     100% { transform: translateX(-50%) scaleY(0.85) scaleX(1.1); opacity: 1; }
 }
 
-/* 寮瑰箷 */
+/* 弹幕 */
 .barrage-container {
     position: absolute; top: 0; left: 0;
     width: 100%; height: 100%;
@@ -272,7 +272,7 @@ body {
     100% { transform: translateX(-100%); }
 }
 
-/* 鍚戜笅婊氬姩鎻愮ず */
+/* 向下滚动提示 */
 .scroll-hint {
     position: absolute; bottom: 40px; left: 50%; transform: translateX(-50%);
     z-index: 15; text-align: center;
@@ -311,7 +311,7 @@ body {
     50% { opacity: 1; }
 }
 
-/* ===== 瑙嗛鑳屾櫙棣栭〉 ===== */
+/* ===== 视频背景首页 ===== */
 .video-section {
     position: relative;
     width: 100%; height: 100vh;
@@ -362,7 +362,7 @@ body {
     50% { top: 18px; opacity: 1; }
 }
 
-/* ===== 骞荤伅鐗囧尯鍩?===== */
+/* ===== 幻灯片区域 ===== */
 .slide-section {
     position: relative;
     width: 100%; height: 100vh;
@@ -437,7 +437,7 @@ body {
 }
 .slide-section.visible .slide-tag { opacity: 1; }
 
-/* 杩涘害鏉?*/
+/* 进度条 */
 .progress-bar {
     position: fixed; right: 16px; top: 50%; transform: translateY(-50%);
     z-index: 100; display: flex; flex-direction: column; gap: 14px;
@@ -455,7 +455,7 @@ body {
     transform: scale(1.4);
 }
 
-/* ===== 缁撳熬鍗＄墖 ===== */
+/* ===== 结尾卡片 ===== */
 .end-section {
     position: relative;
     width: 100%; height: 100vh;
@@ -496,83 +496,83 @@ body {
 </head>
 <body>
 
-<!-- ===== 鐑熻姳棣栭〉 ===== -->
-<section class=fireworks-section id=fireworksSection>
-    <div class=fireworks-stars id=fireworksStars></div>
-    <canvas class=fireworks-canvas id=fireworksCanvas></canvas>
+<!-- ===== 烟花首页 ===== -->
+<section class="fireworks-section" id="fireworksSection">
+    <div class="fireworks-stars" id="fireworksStars"></div>
+    <canvas class="fireworks-canvas" id="fireworksCanvas"></canvas>
 
-    <div class=cake-container id=cakeContainer>
-        <div class=birthday-title>鐢熸棩蹇箰</div>
-        <div class=cake>
-            <div class=candles>
-                <div class=candle><div class=flame></div></div>
-                <div class=candle><div class=flame></div></div>
-                <div class=candle><div class=flame></div></div>
+    <div class="cake-container" id="cakeContainer">
+        <div class="birthday-title">生日快乐</div>
+        <div class="cake">
+            <div class="candles">
+                <div class="candle"><div class="flame"></div></div>
+                <div class="candle"><div class="flame"></div></div>
+                <div class="candle"><div class="flame"></div></div>
             </div>
-            <div class=cake-layer-top>
-                <div class=cream-edge><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="cake-layer-top">
+                <div class="cream-edge"><span></span><span></span><span></span><span></span><span></span><span></span></div>
             </div>
-            <div class=cake-layer-mid>
-                <div class=cream-edge><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="cake-layer-mid">
+                <div class="cream-edge"><span></span><span></span><span></span><span></span><span></span><span></span></div>
             </div>
-            <div class=cake-layer-base>
-                <div class=cream-edge><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
+            <div class="cake-layer-base">
+                <div class="cream-edge"><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div>
             </div>
         </div>
     </div>
 
-    <div class=barrage-container id=barrageContainer></div>
+    <div class="barrage-container" id="barrageContainer"></div>
 
-    <div class=rocket-container id=rocketContainer>
-        <div class=rocket-body>
-            <div class=rocket-stripe></div>
-            <div class=rocket-stripe></div>
-            <div class=rocket-stripe></div>
+    <div class="rocket-container" id="rocketContainer">
+        <div class="rocket-body">
+            <div class="rocket-stripe"></div>
+            <div class="rocket-stripe"></div>
+            <div class="rocket-stripe"></div>
         </div>
-        <div class=rocket-fins>
-            <div class=rocket-fin></div>
-            <div class=rocket-fin></div>
+        <div class="rocket-fins">
+            <div class="rocket-fin"></div>
+            <div class="rocket-fin"></div>
         </div>
     </div>
 
-    <button class=btn-ignite id=btnIgnite onclick=ignite()>鐐?鐕?鐑?鑺?/button>
+    <button class="btn-ignite" id="btnIgnite" onclick="ignite()">点 燃 烟 花</button>
 
-    <div class=scroll-hint id=scrollHint>
-        <span class=hint-text>鍚戜笅婊氬姩</span>
-        <span class=hint-arrow></span>
+    <div class="scroll-hint" id="scrollHint">
+        <span class="hint-text">向下滚动</span>
+        <span class="hint-arrow"></span>
     </div>
 </section>
 
-<!-- ===== 瑙嗛鑳屾櫙棣栭〉 ===== -->
-<section class=video-section id=videoSection>
+<!-- ===== 视频背景首页 ===== -->
+<section class="video-section" id="videoSection">
     <iframe
-        src=https://player.bilibili.com/player.html?bvid=BV1ab411n7no&autoplay=1&muted=1&controls=0&loop=1&danmaku=0&t=0
-        allow=autoplay
-        sandbox="allow-scripts allow-same-origin allow-presentation allow-autoplay">
+        src="https://player.bilibili.com/player.html?bvid=BV1ab411n7no&autoplay=1&muted=1&controls=0&loop=1&danmaku=0&t=0"
+        allow="autoplay"
+        sandbox="allow-scripts allow-same-origin allow-presentation">
     </iframe>
-    <div class=video-overlay></div>
-    <div class=video-hint>
-        <span class=scroll-text>鍚戜笅婊氬姩</span>
-        <span class=scroll-arrow></span>
+    <div class="video-overlay"></div>
+    <div class="video-hint">
+        <span class="scroll-text">向下滚动</span>
+        <span class="scroll-arrow"></span>
     </div>
 </section>
 
-<!-- 骞荤伅鐗囧尯鍩?- JS 鍔ㄦ€佺敓鎴?-->
-<div id=slidesContainer></div>
+<!-- 幻灯片区域 - JS 动态生成 -->
+<div id="slidesContainer"></div>
 
-<!-- 缁撳熬 -->
-<section class=end-section id=endSection>
-    <div class=end-content>
-        <h3>鎰夸綘姘歌繙琚埍鍖呭洿</h3>
-        <div class=heart>&hearts;</div>
+<!-- 结尾 -->
+<section class="end-section" id="endSection">
+    <div class="end-content">
+        <h3>愿你永远被爱包围</h3>
+        <div class="heart">&hearts;</div>
     </div>
 </section>
 
-<!-- 鍙充晶杩涘害鏉?-->
-<div class=progress-bar id=progressBar></div>
+<!-- 右侧进度条 -->
+<div class="progress-bar" id="progressBar"></div>
 
 <script>
-// ===== 鐑熻姳鍔ㄧ敾寮曟搸 =====
+// ===== 烟花动画引擎 =====
 (function() {
     const canvas = document.getElementById('fireworksCanvas');
     const ctx = canvas.getContext('2d');
@@ -662,7 +662,7 @@ body {
         }
     }
 
-    // 鏄熸槦鑳屾櫙
+    // 星星背景
     const starsContainer = document.getElementById('fireworksStars');
     for (let i = 0; i < 80; i++) {
         const star = document.createElement('div');
@@ -677,18 +677,18 @@ body {
         starsContainer.appendChild(star);
     }
 
-    // 寮瑰箷
+    // 弹幕
     const barrageMessages = [
-        { text: '鐢熸棩蹇箰', color: '#ffd60a' },
+        { text: '生日快乐', color: '#ffd60a' },
         { text: 'Happy Birthday', color: '#ff6b9d' },
-        { text: '銇婅獣鐢熸棩銇娿倎銇с仺銇?, color: '#56ccf2' },
-        { text: '靸濎澕 於曧晿頃╇媹雼?, color: '#a78bfa' },
+        { text: 'お誕生日おめでとう', color: '#56ccf2' },
+        { text: '생일 축하합니다', color: '#a78bfa' },
         { text: 'Joyeux Anniversaire', color: '#fbbf24' },
         { text: 'Alles Gute zum Geburtstag', color: '#34d399' },
-        { text: 'Feliz Cumplea帽os', color: '#fb923c' },
+        { text: 'Feliz Cumpleaños', color: '#fb923c' },
         { text: 'Buon Compleanno', color: '#f472b6' },
-        { text: '小 写薪褢屑 褉芯卸写械薪懈褟', color: '#60a5fa' },
-        { text: 'Feliz Anivers谩rio', color: '#c084fc' },
+        { text: 'С днём рождения', color: '#60a5fa' },
+        { text: 'Feliz Aniversário', color: '#c084fc' },
     ];
 
     function startBarrage() {
@@ -724,7 +724,7 @@ body {
         });
     }
 
-    // 鐐圭噧鐑熻姳
+    // 点燃烟花
     window.ignite = function() {
         const btn = document.getElementById('btnIgnite');
         const rocket = document.getElementById('rocketContainer');
@@ -758,7 +758,8 @@ body {
             setTimeout(() => {
                 document.getElementById('cakeContainer').classList.add('show');
                 startBarrage();
-                // 铔嬬硶鍑虹幇鍚?4 绉掓樉绀哄悜涓嬫粴鍔ㄦ彁绀?                setTimeout(() => {
+                // 蛋糕出现后 4 秒显示向下滚动提示
+                setTimeout(() => {
                     document.getElementById('scrollHint').classList.add('show');
                 }, 4000);
             }, 1000);
@@ -766,47 +767,47 @@ body {
     };
 })();
 
-// ===== 鐢熸棩璐哄崱骞荤伅鐗?=====
+// ===== 生日贺卡幻灯片 =====
 const photos = [
-    { src: './0A4A8009013150F66202A729F6EB4DD6.jpg', tag: '鍏冩皵婊℃弧' },
-    { src: './2FBD6E39F9C6A25B0C3788E52D79737A.jpg', tag: '鐢滅編鏃跺厜' },
-    { src: './43CC63968C40D182D28C59C40C00C7F7.jpg', tag: '浼橀泤濡傝瘲' },
-    { src: './456E5912D18E9747D2399A2DD89624B6.jpg', tag: '闆ㄤ腑婕' },
-    { src: './6082812289A54673CD90AE0827EE236E.jpg', tag: '鏆楀娴佸厜' },
-    { src: './958A3BBEF8774EDAAE2F3B4487370D0F.jpg', tag: '搴勫洯鍗堝悗' },
-    { src: './D0E2A61CBC2875FF1AB801C3E21543C8.jpg', tag: '鑽夊湴鏆栭槼' },
-    { src: './0C677531CF3B15E1787FFC313306D9DB.jpg', tag: '鎱垫噿鏃ュ父' },
-    { src: './12E760BA23BEBFB5030A39BC81E28FBD.jpg', tag: '鐢板洯椋庨搩' },
-    { src: './1E53E073BC84A8F7FD2564974D0D7244.jpg', tag: '闀滀腑鏃跺厜' },
-    { src: './17AEDF0194FCA81F1AF81C1C72B7CF81.jpg', tag: '娆㈣仛鏃跺埢' },
-    { src: './7DAC66202BF1349539FCC5F6046F135B.jpg', tag: '鍙埍鍐棩' },
-    { src: './985F9B3F5E599C483BE434C97A0A48AF.jpg', tag: '鐏跨儌绗戝' }
+    { src: './0A4A8009013150F66202A729F6EB4DD6.jpg', tag: '元气满满' },
+    { src: './2FBD6E39F9C6A25B0C3788E52D79737A.jpg', tag: '甜美时光' },
+    { src: './43CC63968C40D182D28C59C40C00C7F7.jpg', tag: '优雅如诗' },
+    { src: './456E5912D18E9747D2399A2DD89624B6.jpg', tag: '雨中漫步' },
+    { src: './6082812289A54673CD90AE0827EE236E.jpg', tag: '暗夜流光' },
+    { src: './958A3BBEF8774EDAAE2F3B4487370D0F.jpg', tag: '庄园午后' },
+    { src: './D0E2A61CBC2875FF1AB801C3E21543C8.jpg', tag: '草地暖阳' },
+    { src: './0C677531CF3B15E1787FFC313306D9DB.jpg', tag: '慵懒日常' },
+    { src: './12E760BA23BEBFB5030A39BC81E28FBD.jpg', tag: '田园风铃' },
+    { src: './1E53E073BC84A8F7FD2564974D0D7244.jpg', tag: '镜中时光' },
+    { src: './17AEDF0194FCA81F1AF81C1C72B7CF81.jpg', tag: '欢聚时刻' },
+    { src: './7DAC66202BF1349539FCC5F6046F135B.jpg', tag: '可爱冬日' },
+    { src: './985F9B3F5E599C483BE434C97A0A48AF.jpg', tag: '灿烂笑容' }
 ];
 
 const blessings = [
-    '鎰夸綘宀佸瞾骞冲畨锛屽勾骞村鎰?,
-    '鐢熸棩蹇箰锛屾案杩滅編涓藉姩浜?,
-    '鎰夸綘鐪奸噷鏈夊厜锛屽績涓湁鐖?,
-    '鎰夸綘琚笘鐣屾俯鏌斾互寰?,
-    '鏂扮殑涓€宀侊紝鏂扮殑绮惧僵',
-    '鎰夸綘鎵€鎰匡紝缁堣兘瀹炵幇',
-    '鐢熸棩蹇箰锛屼竾浜嬭儨鎰?,
-    '鎰夸綘姘歌繙鑷敱濡傞',
-    '宀佹湀涓嶈触缇庝汉锛岀敓鏃ュ揩涔?,
-    '鎰夸綘姣忓ぉ閮藉儚浠婂ぉ涓€鏍峰紑蹇?,
-    '鎰熻阿鐩搁亣锛岀敓鏃ュ揩涔?,
-    '鎰夸綘鍓嶇▼浼奸敠锛屾湭鏉ュ彲鏈?,
-    '鐢熸棩蹇箰锛屾効浣犳案杩滈棯闂彂鍏?
+    '愿你岁岁平安，年年如意',
+    '生日快乐，永远美丽动人',
+    '愿你眼里有光，心中有爱',
+    '愿你被世界温柔以待',
+    '新的一岁，新的精彩',
+    '愿你所愿，终能实现',
+    '生日快乐，万事胜意',
+    '愿你永远自由如风',
+    '岁月不败美人，生日快乐',
+    '愿你每天都像今天一样开心',
+    '感谢相遇，生日快乐',
+    '愿你前程似锦，未来可期',
+    '生日快乐，愿你永远闪闪发光'
 ];
 
 const container = document.getElementById('slidesContainer');
 const progressBar = document.getElementById('progressBar');
 
-// 鐑熻姳棣栭〉鐨勮繘搴︾偣
+// 烟花首页的进度点
 (function() {
     const dot = document.createElement('span');
     dot.className = 'progress-dot';
-    dot.title = '鐑熻姳璐哄崱';
+    dot.title = '烟花贺卡';
     dot.onclick = () => {
         document.getElementById('fireworksSection').scrollIntoView({ behavior: 'smooth' });
     };
@@ -818,12 +819,12 @@ photos.forEach((photo, i) => {
     section.className = 'slide-section';
     section.id = 'slide' + i;
     section.innerHTML = `
-        <div class=slide-bg style=background-image:url('${photo.src}')></div>
-        <div class=birthday-text>
+        <div class="slide-bg" style="background-image:url('${photo.src}')"></div>
+        <div class="birthday-text">
             <h2>${blessings[i]}</h2>
-            <div class=sub>Happy Birthday</div>
+            <div class="sub">Happy Birthday</div>
         </div>
-        <div class=slide-tag>${String(i+1).padStart(2,'0')} 路 ${photo.tag}</div>
+        <div class="slide-tag">${String(i+1).padStart(2,'0')} · ${photo.tag}</div>
     `;
     container.appendChild(section);
 
@@ -851,11 +852,13 @@ const observer = new IntersectionObserver((entries) => {
             if (id === 'fireworksSection') {
                 if (dots[0]) dots[0].classList.add('active');
             } else if (id === 'videoSection') {
-                // 瑙嗛鍖哄搴旂浜屼釜鐐癸紙绱㈠紩1锛?                if (dots[1]) dots[1].classList.add('active');
+                // 视频区对应第二个点（索引1）
+                if (dots[1]) dots[1].classList.add('active');
             } else if (id === 'endSection') {
                 if (dots.length > 0) dots[dots.length - 1].classList.add('active');
             } else if (id && id.startsWith('slide')) {
-                const idx = parseInt(id.replace('slide', '')) + 2; // +2 璺宠繃鐑熻姳鍜岃棰?                if (dots[idx]) dots[idx].classList.add('active');
+                const idx = parseInt(id.replace('slide', '')) + 2; // +2 跳过烟花和视频
+                if (dots[idx]) dots[idx].classList.add('active');
             }
         }
     });
